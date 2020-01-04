@@ -137,7 +137,7 @@ class AffiliateWindow extends \Oara\Network
                 }
             }
         } catch (\Exception $e) {
-            echo "oara step5 :".$e->getMessage()."\n ";
+            //echo "oara step5 :".$e->getMessage()."\n ";
             throw new \Exception($e);
         }
         return $merchants;
@@ -173,7 +173,7 @@ class AffiliateWindow extends \Oara\Network
                 $vouchers = \str_getcsv($result[0], "\n");
             }
         } catch (\Exception $e) {
-            echo "AffiliateWindow getVouchers error:".$e->getMessage()."\n ";
+            //echo "AffiliateWindow getVouchers error:".$e->getMessage()."\n ";
             throw new \Exception($e);
         }
         return $vouchers;
@@ -256,7 +256,7 @@ class AffiliateWindow extends \Oara\Network
                 }                
             }
         } catch (\Exception $e) {
-            echo "oara step5 :".$e->getMessage()."\n ";
+            //echo "oara step5 :".$e->getMessage()."\n ";
             throw new \Exception($e);
         }
         return $totalTransactions;
@@ -386,7 +386,7 @@ class AffiliateWindow extends \Oara\Network
                 $advList = \str_getcsv($content, "\n");
             }
         } catch (\Exception $e) {
-            echo "AffiliateWindow getAdvertisers error:".$e->getMessage()."\n ";
+            //echo "AffiliateWindow getAdvertisers error:".$e->getMessage()."\n ";
             throw new \Exception($e);
         }
         return $advList;
@@ -415,7 +415,7 @@ class AffiliateWindow extends \Oara\Network
                 $products = \str_getcsv($content, "\n");
             }
         } catch (\Exception $e) {
-            echo "php-oara AffiliateWindow getProducts error:".$e->getMessage()."\n ";
+            //echo "php-oara AffiliateWindow getProducts error:".$e->getMessage()."\n ";
             throw new \Exception($e);
         }
         return $products;
