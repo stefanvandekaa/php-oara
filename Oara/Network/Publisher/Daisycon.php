@@ -234,7 +234,7 @@ class Daisycon extends \Oara\Network
 						} else {
 							throw new \Exception("Unexpected transaction status {$a_part['status']}");
 						}
-						$transactionArray['currency'] = 'EUR';  // Default value
+						$transactionArray['currency'] = $a_part['currency_code'];
 						$transactionArray['amount'] = \Oara\Utilities::parseDouble($a_part['revenue']);
 						$transactionArray['commission'] = \Oara\Utilities::parseDouble($a_part['commission']);
 						$transactionArray['IP'] = $transaction['anonymous_ip'];
