@@ -43,27 +43,10 @@ class Belboon extends \Oara\Network
         $password = $credentials['apipassword'];
 
         //Setting the client.
-
-        $oSmartFeed = new \SoapClient("http://smartfeeds.belboon.com/SmartFeedServices.php?wsdl");
-        $oSessionHash = $oSmartFeed->login($user, $password);
-
         $this->_client = new \SoapClient('http://api.belboon.com/?wsdl', array('login' => $user, 'password' => $password, 'trace' => true));
         $this->_client->getAccountInfo();
 
-
-        if (!$oSessionHash->HasError) {
-
-            $sSessionHash = $oSessionHash->Records['sessionHash'];
-
-            $aResult = $oSmartFeed->getPlatforms($sSessionHash);
-            $platformList = array();
-            foreach ($aResult->Records as $record) {
-                if ($record['status'] == "active") {
-                    $platformList[] = $record;
-                }
-            }
-            $this->_platformList = $platformList;
-        }
+        $this->_platformId = $credentials['platform_id'];
     }
 
     /**
@@ -103,17 +86,14 @@ class Belboon extends \Oara\Network
     public function getMerchantList()
     {
         $merchantList = array();
-        foreach ($this->_platformList as $platform) {
-            // $result = $this->_client->getPrograms($platform["id"], null, \utf8_encode('PARTNERSHIP'), null, null, null, 0);
-            $result = $this->_client->getPrograms($platform["id"], null, null, null, null, null, 0);
-            foreach ($result->handler->programs as $merchant) {
-                $obj = array();
-                $obj["name"] = $merchant["programname"];
-                $obj["cid"] = $merchant["programid"];
-                $obj["url"] = $merchant["advertiserurl"];
-                $obj["status"] = $merchant["partnershipstatus"];
-                $merchantList[] = $obj;
-            }
+        $result = $this->_client->getPrograms($this->_platformId, null, null, null, null, null, 0);
+        foreach ($result->handler->programs as $merchant) {
+            $obj = array();
+            $obj["name"] = $merchant["programname"];
+            $obj["cid"] = $merchant["programid"];
+            $obj["url"] = $merchant["advertiserurl"];
+            $obj["status"] = $merchant["partnershipstatus"];
+            $merchantList[] = $obj;
         }
         return $merchantList;
     }
@@ -138,7 +118,7 @@ class Belboon extends \Oara\Network
 
             foreach ($result->handler->events as $event) {
                 $num_rercords++;
-                // if (isset($merchantIdMap[$event["programid"]])) {
+                if ($event['platformid'] != $this->_platformId) continue;
                 $transaction = Array();
                 $transaction['unique_id'] = $event["eventid"];
                 $transaction['merchantId'] = $event["programid"];
@@ -154,18 +134,16 @@ class Belboon extends \Oara\Network
 
                 if ($event["eventstatus"] == 'APPROVED') {
                     $transaction['status'] = \Oara\Utilities::STATUS_CONFIRMED;
-                } else
-                    if ($event["eventstatus"] == 'PENDING') {
-                        $transaction['status'] = \Oara\Utilities::STATUS_PENDING;
-                    } else
-                        if ($event["eventstatus"] == 'REJECTED') {
-                            $transaction['status'] = \Oara\Utilities::STATUS_DECLINED;
-                        }
+                } elseif ($event["eventstatus"] == 'PENDING') {
+                    $transaction['status'] = \Oara\Utilities::STATUS_PENDING;
+                } elseif ($event["eventstatus"] == 'REJECTED') {
+                    $transaction['status'] = \Oara\Utilities::STATUS_DECLINED;
+                }
 
                 $transaction['amount'] = \Oara\Utilities::parseDouble($event["netvalue"]);
                 $transaction['commission'] = \Oara\Utilities::parseDouble($event["eventcommission"]);
+                $transaction['currency'] = $event["eventcurrency"];
                 $totalTransactions[] = $transaction;
-                // }
             }
             if ($num_rercords < $records_per_call) {
                 break;
