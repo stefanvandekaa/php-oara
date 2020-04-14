@@ -132,22 +132,41 @@ class Financeads extends \Oara\Network
 	public function getTransactionList($merchantList = null, \DateTime $dStartDate = null, \DateTime $dEndDate = null)
 	{
         $key = $this->_credentials['key'];
-        $id_site = $this->_credentials['idSite'];      // publisher id to retrieve (empty = all publishers)
+        $id_site = $this->_credentials['idSite'];
 
-        $cacheFile = getcwd() . '/data/cache/stats/'.$_SERVER['HTTP_HOST'].'_financeadsRAW_2014-01-01_'.date('Y-m-d').'.txt';
+        $key2 = false;
+        if (isset($this->_credentials['idSite2'])) {
+            $key2 = $this->_credentials['key2'];
+            $id_site2 = $this->_credentials['idSite2'];
+        }
+
+        $currency = 'EUR';
+        if (isset($this->_credentials['currency']))
+            $currency = $this->_credentials['currency'];
+
+        $cacheFile = getcwd() . '/data/cache/stats/'.$_SERVER['HTTP_HOST'].'_financeadsRAW_2014-01-01_'.date('Y-m-d').$currency.'.txt';
         if (!isset($_GET['refresh']) && is_file($cacheFile)) {
-            $response = unserialize(file_get_contents($cacheFile));
+            $transactions = unserialize(file_get_contents($cacheFile));
         } else {
-            $url = "https://data.financeads.net/api/statistics.php?site=l_all&user=19516&key=" . $key . "&w=" . $id_site . "&time_from=2014-01-01&time_to=" . date('Y-m-d');
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
+            // get results from account 1
+            $ch = curl_init("https://data.financeads.net/api/statistics.php?site=l_all&user=19516&key=" . $key . "&w=" . $id_site . "&time_from=2014-01-01&time_to=" . date('Y-m-d').'&currency='.$currency);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $response = curl_exec($ch);
-            file_put_contents($cacheFile, serialize($response));
+            $transactions = $this->import_csv_to_array($response);
+
+            if ($key2) {
+                // get results from account 2
+                $ch = curl_init("https://data.financeads.net/api/statistics.php?site=l_all&user=26828&key=" . $key2 . "&w=" . $id_site2 . "&time_from=2014-01-01&time_to=" . date('Y-m-d') . '&currency=' . $currency);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $response2 = curl_exec($ch);
+                $response2 = $this->import_csv_to_array($response2);
+                $transactions = array_merge($transactions, $response2);
+            }
+
+            file_put_contents($cacheFile, serialize($transactions));
         }
 
         $totalTransactions = array();
-        $transactions = $this->import_csv_to_array($response);
         foreach ($transactions as $transaction) {
             if (strtotime($transaction['l_datum']) < $dStartDate->getTimestamp() || strtotime($transaction['l_datum']) > $dEndDate->getTimestamp()) {
                 continue;
