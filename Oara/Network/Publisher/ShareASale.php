@@ -72,7 +72,7 @@ class ShareASale extends \Oara\Network
 		$this->_apiToken = $credentials['apiToken'];
 		$this->_apiSecret = $credentials['apiSecret'];
 		$this->_apiVersion = 2.3;
-		$this->_apiServer = "http://shareasale.com/x.cfm?";
+		$this->_apiServer = "https://shareasale.com/x.cfm?";
 	}
 
 	/**
@@ -109,8 +109,6 @@ class ShareASale extends \Oara\Network
 	public function checkConnection()
 	{
 		$connection = true;
-		// apitokencount doesn't seem to work anymore, so return true regardless...
-		return $connection;
 
 		$returnResult = self::makeCall("apitokencount");
 		if ($returnResult) {
