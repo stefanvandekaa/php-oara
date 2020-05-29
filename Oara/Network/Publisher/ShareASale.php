@@ -109,6 +109,8 @@ class ShareASale extends \Oara\Network
 	public function checkConnection()
 	{
 		$connection = true;
+		// apitokencount doesn't seem to work anymore, so return true regardless...
+		return $connection;
 
 		$returnResult = self::makeCall("apitokencount");
 		if ($returnResult) {
