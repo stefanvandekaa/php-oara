@@ -26,7 +26,8 @@ class Admitad extends \Oara\Network
 	private $_client_secret = null;
 	private $_scope = null;
 	private $_grant_type = null;
-	private $_token = null;
+    private $_token = null;
+    private $_adspace = null;
 
 	/**
 	 * @param $credentials
@@ -48,6 +49,7 @@ class Admitad extends \Oara\Network
 		 */
 		$this->_client_id = $credentials['user'];
 		$this->_client_secret = $credentials['password'];
+        $this->_adspace = $credentials['adspace'];
 		/**
 		 * https://developers.admitad.com/en/doc/api_en/auth/auth-rights/
 		 */
@@ -139,7 +141,7 @@ class Admitad extends \Oara\Network
 		try {
 			//https://developers.admitad.com/en/doc/api_en/methods/advcampaigns/advcampaigns-list/
 			$statisticsActions = "https://api.admitad.com/advcampaigns/";
-			$limit = 100;
+            $limit = 100000; // all at once!
 			$offset = 0;
 			$loop = true;
 
@@ -184,7 +186,7 @@ class Admitad extends \Oara\Network
 	{
 		$totalTransactions = array();
 		try {
-			$limit = 100;
+            $limit = 100000; // all at once!
 			$offset = 0;
 			$loop = true;
 
@@ -199,7 +201,8 @@ class Admitad extends \Oara\Network
 					new \Oara\Curl\Parameter('date_start', $dStartDate->format("d.m.Y")),
 					new \Oara\Curl\Parameter('date_end', $dEndDate->format("d.m.Y")),
 					new \Oara\Curl\Parameter('limit', $limit),
-					new \Oara\Curl\Parameter('offset', $offset)
+					new \Oara\Curl\Parameter('offset', $offset),
+                    new \Oara\Curl\Parameter('website', $this->_adspace)
 				);
 
 				$p = array();
