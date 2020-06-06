@@ -38,6 +38,7 @@ class CommissionJunctionGraphQL extends \Oara\Network
     private $_accountId = null;
     private $_apiPassword = null;
     private $_requestor_cid = null;
+    private $_website_id = null;
     private $_connected = false;
 
     protected $_sitesAllowed = array ();
@@ -60,6 +61,7 @@ class CommissionJunctionGraphQL extends \Oara\Network
     {
         $this->_apiPassword = @$credentials['apipassword'];
         $this->_requestor_cid = @$credentials['id_site'];
+        $this->_website_id = @$credentials['website_id'];
     }
 
     /**
@@ -272,6 +274,7 @@ class CommissionJunctionGraphQL extends \Oara\Network
                 }
                 $query_header .= ']';
             }
+            $query_header .= ', websiteIds:"' . $this->_website_id . '"';
             if ($validDates) {
                 $query_header .= ',
                     sinceEventDate:"' . $sinceDateISO . '",
