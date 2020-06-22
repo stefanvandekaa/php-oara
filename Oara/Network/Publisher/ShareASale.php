@@ -110,6 +110,9 @@ class ShareASale extends \Oara\Network
 	{
 		$connection = true;
 
+		// this saves one API call per site daily
+		return $connection;
+
 		$returnResult = self::makeCall("apitokencount");
 		if ($returnResult) {
 			//parse HTTP Body to determine result of request
